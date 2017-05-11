@@ -25,7 +25,7 @@ def calcExpectedInfo(attDict):
 	info = 0.0
 	for att in attDict:
 		pCount = float(attDict[att])
-		total = float(sum(x for x in attDict.itervalues()))
+		total = float(sum(x for x in attDict.values()))
 		prob = pCount/total
 		info -= (prob*(math.log(prob, 2)))
 
@@ -36,11 +36,11 @@ def calcInfoNeeded(dataRows, attDict, attDictIndex):
 	info = 0.0
 	for att in attDict:
 		pCount = float(attDict[att])
-		total = float(sum(x for x in attDict.itervalues()))
+		total = float(sum(x for x in attDict.values()))
 		subDict = {}
 		for row in dataRows:
 			if row[attDictIndex] is att:
-				if subDict.has_key(row[0]):
+				if row[0] in subDict:
 					subDict[row[0]] += 1
 				else:
 					subDict[row[0]] = 1
@@ -54,7 +54,7 @@ def splitInfo(attDict):
 	split = 0.0
 	for att in attDict:
 		pCount = float(attDict[att])
-		total = float(sum(x for x in attDict.itervalues()))
+		total = float(sum(x for x in attDict.values()))
 		prob = pCount/total
 		split -= (prob*(math.log(prob, 2)))
 
@@ -64,11 +64,11 @@ def splitInfo(attDict):
 def needsLeafNode(node):
 	tempDict = {}
 	for row in node.rows:
-		if tempDict.has_key(row[0]):
+		if row[0] in tempDict:
 			tempDict[row[0]] += 1
 		else:
 			tempDict[row[0]] = 1
-	keys = tempDict.keys()
+	keys = list(tempDict.keys())
 
 	if(len(keys) == 1):
 		return keys[0]
@@ -87,7 +87,7 @@ def buildTree(n):
 
 	for row in n.rows:
 		for x in range(0, numAtts):
-			if(dictList[x].has_key(row[x])):
+			if(row[x] in dictList[x]):
 				dictList[x][row[x]] += 1
 			else:
 				dictList[x][row[x]] = 1
@@ -109,7 +109,7 @@ def buildTree(n):
 		if gainRatio > maxGainRatio:
 			maxGainRatio = gainRatio
 			maxGRIndex = x
-	
+
 	for att in dictList[maxGRIndex]:
 		subList = []
 		tempChildList = []
@@ -118,7 +118,7 @@ def buildTree(n):
 				subList.append(row)
 		child = Node(n, tempChildList, att, maxGRIndex, subList)
 		n.childList.append(child)
-		
+
 	for child in n.childList:
 		buildTree(child)
 
@@ -145,7 +145,7 @@ def testRow(row, root):
 
 
 def run():
-	
+
 	if(len(sys.argv) < 4):
 		sys.exit('Missing an argument. Arguments: Training Set file, Test Set File, Output File.')
 
@@ -166,10 +166,11 @@ def run():
 
 	for row in rows:
 		for x in range(0, numAtts):
-			if(dictList[x].has_key(row[x])):
+			if(row[x] in dictList[x]):
 				dictList[x][row[x]] += 1
 			else:
 				dictList[x][row[x]] = 1
+
 
 	children = []
 	n = Node(None, children, None, None, rows)
@@ -186,10 +187,10 @@ def run():
 		s = 'Predicted Class: ' + str(row[0]) + '	Actual Class: ' + str(c)
 		f2.write(s + '\n')
 
-		
+
 	accuracy = 100.0 * ((float(correct))/(float(len(rows))))
 	s = 'Accuracy: ' + str(accuracy) + '%'
 	f2.write(s)
-	
+
 
 run()
